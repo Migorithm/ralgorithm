@@ -1,77 +1,75 @@
-trait Visitor {
-    fn visit_person(&self, person: &Person);
-    fn visit_organization(&self, o: &Organization);
+struct EventA;
+struct EventB;
+struct EventC;
+
+trait TSender {
+    fn send_event_a(&self, e: &EventA);
+    fn send_event_b(&self, o: &EventB);
+    fn send_event_c(&self, o: &EventC);
 }
 
-trait Element {
-    fn accept(&self, visitor: &mut dyn Visitor);
+trait TNotification {
+    fn accept(&self, sender: &dyn TSender);
 }
 
-impl Element for Person {
-    fn accept(&self, visitor: &mut dyn Visitor) {
-        visitor.visit_person(self);
+impl TNotification for EventA {
+    fn accept(&self, sender: &dyn TSender) {
+        sender.send_event_a(self);
     }
 }
-impl Element for Organization {
-    fn accept(&self, visitor: &mut dyn Visitor) {
-        visitor.visit_organization(self);
-    }
-}
-
-struct Person {
-    name: String,
-    email: String,
-}
-
-impl Person {
-    fn new(name: &str, email: &str) -> Self {
-        Self {
-            email: email.to_string(),
-            name: name.to_string(),
-        }
+impl TNotification for EventB {
+    fn accept(&self, sender: &dyn TSender) {
+        sender.send_event_b(self);
     }
 }
 
-pub struct Organization {
-    name: String,
-    address: String,
-}
-
-impl Organization {
-    fn new(name: &str, address: &str) -> Self {
-        Self {
-            name: name.to_string(),
-            address: address.to_string(),
-        }
+impl TNotification for EventC {
+    fn accept(&self, sender: &dyn TSender) {
+        sender.send_event_c(self);
     }
 }
 
 // Concrete visitor
-struct EmailVisitor;
+struct EmailSender;
 
-impl Visitor for EmailVisitor {
-    fn visit_person(&self, p: &Person) {
-        println!("Sending email to {} at {}", p.name, p.email);
+impl TSender for EmailSender {
+    fn send_event_a(&self, e: &EventA) {
+        println!("Sending email for EventA");
     }
 
-    fn visit_organization(&self, o: &Organization) {
-        println!("Sending mail to {} at {}", o.name, o.address);
+    fn send_event_b(&self, e: &EventB) {
+        println!("Sending email for EventB");
+    }
+
+    fn send_event_c(&self, e: &EventC) {
+        println!("Sending email for EventC");
+    }
+}
+
+struct SlackSender;
+impl TSender for SlackSender {
+    fn send_event_a(&self, e: &EventA) {
+        println!("Sending slack message for EventA");
+    }
+
+    fn send_event_b(&self, e: &EventB) {
+        println!("Sending slack message for EventB");
+    }
+
+    fn send_event_c(&self, e: &EventC) {
+        println!("Sending slack message for EventC");
     }
 }
 
 fn main() {
-    let mut elements: Vec<Box<dyn Element>> = Vec::new();
+    let events: Vec<Box<dyn TNotification>> =
+        vec![Box::new(EventA), Box::new(EventB), Box::new(EventC)];
 
-    let alice = Box::new(Person::new("Alice", "alices@example.com"));
-    let bob = Box::new(Person::new("Bob", "bob@example.com"));
-    let acme = Box::new(Organization::new("Acme Inc.", "123 Main Str."));
+    let email_visitor = EmailSender;
+    let slack_visitor = SlackSender;
 
-    elements.push(alice);
-    elements.push(acme);
-    elements.push(bob);
-
-    let mut email_visitor = EmailVisitor;
-    for element in elements {
-        element.accept(&mut email_visitor);
+    for event in events {
+        event.accept(&email_visitor);
+        event.accept(&slack_visitor);
     }
 }
