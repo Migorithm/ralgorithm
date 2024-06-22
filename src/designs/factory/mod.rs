@@ -1,77 +1,72 @@
 // Factory method pattern
-enum PizzaType {
-    Cheese,
+enum KimbabType {
+    Tuna,
     Veggie,
 }
 
-trait TPizzaStore {
-    // Whole responsibility of creating pizza is delegated to the factory method
-    fn create_pizza(&self, pizza_type: PizzaType) -> Box<dyn TPizza>;
+// Factory to create kimbab
+trait TKimbabStore {
+    // Whole responsibility of creating kimbab is delegated to the factory method
+    fn make_kimbab(&self, kimbab_type: KimbabType) -> Box<dyn TKimbab>;
 
-    // Template method to order pizza
-    fn order_pizza(&self, pizza_type: PizzaType) -> Box<dyn TPizza> {
-        let mut pizza = self.create_pizza(pizza_type);
-        pizza.prepare();
-        pizza.bake();
-        pizza.cut();
-        pizza.boxed();
-        pizza
+    // Template method to order kimbab
+    fn order_kimbab(&self, kimbab_type: KimbabType) -> Box<dyn TKimbab> {
+        let mut kimbab = self.make_kimbab(kimbab_type);
+        kimbab.prepare();
+        kimbab.cut();
+        kimbab.boxed();
+        kimbab
     }
 }
 
-trait TPizza {
+// Product sold by the store
+trait TKimbab {
     fn prepare(&mut self);
-    fn bake(&mut self);
     fn cut(&mut self);
     fn boxed(&mut self);
 }
 
-struct NYPizzaStore;
+struct NYKimbabStore;
 
-impl TPizzaStore for NYPizzaStore {
-    fn create_pizza(&self, pizza_type: PizzaType) -> Box<dyn TPizza> {
-        match pizza_type {
-            PizzaType::Cheese => Box::new(NYCheesePizza),
-            PizzaType::Veggie => Box::new(NYVeggiePizza),
+impl TKimbabStore for NYKimbabStore {
+    fn make_kimbab(&self, kimbab_type: KimbabType) -> Box<dyn TKimbab> {
+        match kimbab_type {
+            KimbabType::Tuna => Box::new(NYTunaKimbab),
+            KimbabType::Veggie => Box::new(NYVeggieKimbab),
         }
     }
 }
 
-struct NYCheesePizza;
-impl TPizza for NYCheesePizza {
+struct NYTunaKimbab;
+impl TKimbab for NYTunaKimbab {
     fn prepare(&mut self) {
-        println!("Preparing NY Cheese Pizza");
+        println!("Preparing NY Tuna Kimbab");
     }
-    fn bake(&mut self) {
-        println!("Baking NY Cheese Pizza");
-    }
+
     fn cut(&mut self) {
-        println!("Cutting NY Cheese Pizza");
+        println!("Cutting NY Tuna Kimbab");
     }
     fn boxed(&mut self) {
-        println!("Boxing NY Cheese Pizza");
+        println!("Boxing NY Tuna Kimbab");
     }
 }
 
-struct NYVeggiePizza;
-impl TPizza for NYVeggiePizza {
+struct NYVeggieKimbab;
+impl TKimbab for NYVeggieKimbab {
     fn prepare(&mut self) {
-        println!("Preparing NY Veggie Pizza");
-    }
-    fn bake(&mut self) {
-        println!("Baking NY Veggie Pizza");
+        println!("Preparing NY Veggie Kimbab");
     }
     fn cut(&mut self) {
-        println!("Cutting NY Veggie Pizza");
+        println!("Cutting NY Veggie Kimbab");
     }
     fn boxed(&mut self) {
-        println!("Boxing NY Veggie Pizza");
+        println!("Boxing NY Veggie Kimbab");
     }
 }
 
 #[test]
-fn test_ny_pizza() {
-    let ny_factory = NYPizzaStore;
+fn test_ny_kimbab() {
+    let ny_factory = NYKimbabStore;
 
-    let _ny_veggie_pizza = ny_factory.order_pizza(PizzaType::Veggie);
+    let _ny_veggie_imbab = ny_factory.order_kimbab(KimbabType::Veggie);
 }
